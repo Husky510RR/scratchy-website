@@ -1,0 +1,102 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1C1B22;
+  color: #FFFFFF;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#app {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.nascosto {
+  display: none !important;
+}
+
+.eyebrow {
+  font-size: 14px;
+  opacity: 0.6;
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.istruzioni {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 24px;
+}
+
+#contenitore-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#contenuto-sotto {
+  z-index: 1;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2FBFAE;
+  font-size: 64px;
+}
+
+#contenuto-sotto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#canvas-scratch {
+  z-index: 2;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+#cta-download {
+  margin-top: 28px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#cta-download p {
+  margin-bottom: 12px;
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.bottone-cta {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #1A1A1A;
+  padding: 14px 32px;
+  border-radius: 26px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 16px;
+}

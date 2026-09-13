@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Scratchy</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="stato-caricamento">
+      <p>Caricamento...</p>
+    </div>
+
+    <div id="stato-errore" class="nascosto">
+      <p>Questo grattino non esiste più 😢</p>
+    </div>
+
+    <div id="stato-grattino" class="nascosto">
+      <p class="eyebrow">Hai ricevuto un</p>
+      <h1>Scratchy 🎁</h1>
+      <p class="istruzioni">Gratta con il dito per scoprire cosa c'è sotto</p>
+
+      <div id="contenitore-canvas">
+        <canvas id="canvas-scratch"></canvas>
+        <div id="contenuto-sotto"></div>
+      </div>
+
+      <div id="cta-download" class="nascosto">
+        <p>Ti è piaciuto? Crea il tuo Scratchy!</p>
+        <a href="https://apps.apple.com" id="link-store" class="bottone-cta">Scarica l'app</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="scratch.js"></script>
+</body>
+</html>
