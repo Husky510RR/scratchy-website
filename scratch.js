@@ -44,6 +44,10 @@ function mostraGrattino(grattino) {
 
   contenutoCorrente = { tipo: grattino.tipo_contenuto, valore: grattino.valore_contenuto };
 
+  if (grattino.nome_mittente) {
+    document.getElementById('eyebrow').textContent = 'Hai ricevuto un regalo da ' + grattino.nome_mittente + ':';
+  }
+
   const contenutoSotto = document.getElementById('contenuto-sotto');
   if (grattino.tipo_contenuto === 'emoji') {
     contenutoSotto.textContent = grattino.valore_contenuto;
