@@ -36,9 +36,13 @@ function mostraErrore() {
   document.getElementById('stato-errore').classList.remove('nascosto');
 }
 
+let contenutoCorrente = null;
+
 function mostraGrattino(grattino) {
   document.getElementById('stato-caricamento').classList.add('nascosto');
   document.getElementById('stato-grattino').classList.remove('nascosto');
+
+  contenutoCorrente = { tipo: grattino.tipo_contenuto, valore: grattino.valore_contenuto };
 
   const contenutoSotto = document.getElementById('contenuto-sotto');
   if (grattino.tipo_contenuto === 'emoji') {
@@ -185,6 +189,39 @@ function avviaScratch(coloreOverlay, grattinoId) {
   canvas.addEventListener('touchmove', continuaDisegno);
   canvas.addEventListener('touchend', fineDisegno);
 }
+
+async function scaricaFoto() {
+  if (!contenutoCorrente) return;
+
+  if (contenutoCorrente.tipo === 'emoji') {
+    const canvasEmoji = document.createElement('canvas');
+    canvasEmoji.width = 500;
+    canvasEmoji.height = 500;
+    const ctxEmoji = canvasEmoji.getContext('2d');
+    ctxEmoji.fillStyle = '#2FBFAE';
+    ctxEmoji.fillRect(0, 0, 500, 500);
+    ctxEmoji.font = '260px sans-serif';
+    ctxEmoji.textAlign = 'center';
+    ctxEmoji.textBaseline = 'middle';
+    ctxEmoji.fillText(contenutoCorrente.valore, 250, 270);
+
+    const link = document.createElement('a');
+    link.download = 'scratchy.png';
+    link.href = canvasEmoji.toDataURL('image/png');
+    link.click();
+  } else {
+    const risposta = await fetch(contenutoCorrente.valore);
+    const blob = await risposta.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = 'scratchy.jpg';
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+document.getElementById('btn-salva-foto').addEventListener('click', scaricaFoto);
 
 async function inizializza() {
   await supabaseClient.auth.signInAnonymously();
