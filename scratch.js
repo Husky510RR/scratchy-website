@@ -37,12 +37,16 @@ function mostraErrore() {
 }
 
 let contenutoCorrente = null;
+let pushTokenMittente = null;
+let nomeMittenteCorrente = null;
 
 function mostraGrattino(grattino) {
   document.getElementById('stato-caricamento').classList.add('nascosto');
   document.getElementById('stato-grattino').classList.remove('nascosto');
 
   contenutoCorrente = { tipo: grattino.tipo_contenuto, valore: grattino.valore_contenuto };
+  pushTokenMittente = grattino.push_token || null;
+  nomeMittenteCorrente = grattino.nome_mittente || null;
 
   if (grattino.nome_mittente) {
     document.getElementById('eyebrow').textContent = 'Hai ricevuto un regalo da ' + grattino.nome_mittente + ':';
@@ -184,6 +188,7 @@ function avviaScratch(coloreOverlay, grattinoId) {
       document.getElementById('cta-download').classList.remove('nascosto');
     document.getElementById('cta-download').style.opacity = '1';
       supabaseClient.from('grattini').update({ grattato: true }).eq('id', grattinoId).then(({ error }) => { if (error) console.error('Errore salvataggio grattato:', error); else console.log('Salvato correttamente'); });
+      inviaNotificaApertura();
     }
   }
 
@@ -228,6 +233,33 @@ async function scaricaFoto() {
 }
 
 document.getElementById('btn-salva-foto').addEventListener('click', scaricaFoto);
+
+async function inviaNotificaApertura() {
+  if (!pushTokenMittente) return;
+
+  const messaggio = nomeMittenteCorrente
+    ? nomeMittenteCorrente + ', il tuo Scratchy è stato grattato! 🎉'
+    : 'Il tuo Scratchy è stato grattato! 🎉';
+
+  try {
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: pushTokenMittente,
+        title: 'Scratchy 🎁',
+        body: messaggio,
+        sound: 'default',
+      }),
+    });
+  } catch (errore) {
+    console.error('Errore invio notifica:', errore);
+  }
+}
 
 async function inizializza() {
   await supabaseClient.auth.signInAnonymously();
