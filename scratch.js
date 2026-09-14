@@ -49,10 +49,17 @@ function mostraGrattino(grattino) {
     contenutoSotto.appendChild(img);
   }
 
-  avviaScratch(grattino.colore_stile || '#D4AF37');
+  if (grattino.grattato) {
+    document.getElementById('canvas-scratch').classList.add('nascosto');
+    document.getElementById('istruzioni').classList.add('nascosto');
+    document.getElementById('cta-download').style.opacity = '1';
+    return;
+  }
+
+  avviaScratch(grattino.colore_stile || '#D4AF37', grattino.id);
 }
 
-function avviaScratch(coloreOverlay) {
+function avviaScratch(coloreOverlay, grattinoId) {
   const canvas = document.getElementById('canvas-scratch');
   const ctx = canvas.getContext('2d');
   const contenitore = document.getElementById('contenitore-canvas');
@@ -166,6 +173,7 @@ function avviaScratch(coloreOverlay) {
     if (percentuale > 55 && !rivelato) {
       rivelato = true;
       document.getElementById('cta-download').style.opacity = '1';
+      supabaseClient.from('grattini').update({ grattato: true }).eq('id', grattinoId).then(({ error }) => { if (error) console.error('Errore salvataggio grattato:', error); else console.log('Salvato correttamente'); });
     }
   }
 
