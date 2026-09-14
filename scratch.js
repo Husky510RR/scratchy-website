@@ -186,4 +186,9 @@ function avviaScratch(coloreOverlay, grattinoId) {
   canvas.addEventListener('touchend', fineDisegno);
 }
 
-caricaGrattino();
+async function inizializza() {
+  await supabaseClient.auth.signInAnonymously();
+  caricaGrattino();
+}
+
+inizializza();
