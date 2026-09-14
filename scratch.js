@@ -56,6 +56,7 @@ function mostraGrattino(grattino) {
   if (grattino.grattato) {
     document.getElementById('canvas-scratch').classList.add('nascosto');
     document.getElementById('istruzioni').classList.add('nascosto');
+    document.getElementById('cta-download').classList.remove('nascosto');
     document.getElementById('cta-download').style.opacity = '1';
     return;
   }
@@ -176,7 +177,8 @@ function avviaScratch(coloreOverlay, grattinoId) {
     const percentuale = (celleVisitate.size / celleTotali) * 100;
     if (percentuale > 55 && !rivelato) {
       rivelato = true;
-      document.getElementById('cta-download').style.opacity = '1';
+      document.getElementById('cta-download').classList.remove('nascosto');
+    document.getElementById('cta-download').style.opacity = '1';
       supabaseClient.from('grattini').update({ grattato: true }).eq('id', grattinoId).then(({ error }) => { if (error) console.error('Errore salvataggio grattato:', error); else console.log('Salvato correttamente'); });
     }
   }
