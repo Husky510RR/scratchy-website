@@ -216,20 +216,43 @@ async function scaricaFoto() {
     ctxEmoji.textBaseline = 'middle';
     ctxEmoji.fillText(contenutoCorrente.valore, 250, 270);
 
-    const link = document.createElement('a');
-    link.download = 'scratchy.png';
-    link.href = canvasEmoji.toDataURL('image/png');
-    link.click();
+    // Su iOS Safari l'attributo download non funziona in modo affidabile:
+    // apriamo l'immagine in una nuova scheda cosi l'utente puo fare
+    // "tieni premuto" -> "Salva in Foto", che salva davvero in galleria.
+    const dataUrl = canvasEmoji.toDataURL('image/png');
+    apriPerSalvataggio(dataUrl);
   } else {
-    const risposta = await fetch(contenutoCorrente.valore);
-    const blob = await risposta.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = 'scratchy.jpg';
-    link.href = url;
-    link.click();
-    URL.revokeObjectURL(url);
+    // Per foto e meme (gif) apriamo direttamente il file originale:
+    // mantiene l'animazione delle gif e permette il salvataggio nativo in Foto.
+    apriPerSalvataggio(contenutoCorrente.valore);
   }
+}
+
+function apriPerSalvataggio(url) {
+  const finestra = window.open('', '_blank');
+  if (!finestra) {
+    // popup bloccato: fallback, prova comunque ad aprire l'url direttamente
+    window.open(url, '_blank');
+    return;
+  }
+  finestra.document.write(`
+    <html>
+      <head>
+        <title>Scratchy</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { margin:0; background:#000; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+          img { max-width:100%; max-height:100vh; }
+          p { position:fixed; bottom:16px; left:0; right:0; text-align:center; color:#fff; font-family:sans-serif; font-size:14px; opacity:0.8; }
+        </style>
+      </head>
+      <body>
+        <img src="${url}" />
+        <p>Tieni premuto sull'immagine per salvarla</p>
+      </body>
+    </html>
+  `);
+  finestra.document.close();
 }
 
 document.getElementById('btn-salva-foto').addEventListener('click', scaricaFoto);
