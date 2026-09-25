@@ -28,7 +28,28 @@ async function caricaGrattino() {
     return;
   }
 
+  if (data.scade_il && new Date(data.scade_il) < new Date()) {
+    // scaduto: mostra il messaggio e cancella la riga + il file (pulizia opportunistica)
+    mostraErrore();
+    eliminaGrattino(data);
+    return;
+  }
+
   mostraGrattino(data);
+}
+
+async function eliminaGrattino(grattino) {
+  try {
+    if (grattino.valore_contenuto && grattino.tipo_contenuto !== 'emoji') {
+      const nomeFile = grattino.valore_contenuto.split('/').pop();
+      if (nomeFile) {
+        await supabaseClient.storage.from('grattini-immagini').remove([nomeFile]);
+      }
+    }
+    await supabaseClient.from('grattini').delete().eq('id', grattino.id);
+  } catch (errore) {
+    console.error('Errore eliminazione grattino:', errore);
+  }
 }
 
 function mostraErrore() {
@@ -39,6 +60,7 @@ function mostraErrore() {
 let contenutoCorrente = null;
 let pushTokenMittente = null;
 let nomeMittenteCorrente = null;
+let grattinoCorrenteEliminaDopoApertura = false;
 
 function mostraGrattino(grattino) {
   document.getElementById('stato-caricamento').classList.add('nascosto');
@@ -47,6 +69,7 @@ function mostraGrattino(grattino) {
   contenutoCorrente = { tipo: grattino.tipo_contenuto, valore: grattino.valore_contenuto };
   pushTokenMittente = grattino.push_token || null;
   nomeMittenteCorrente = grattino.nome_mittente || null;
+  grattinoCorrenteEliminaDopoApertura = grattino.elimina_dopo_apertura || false;
 
   if (grattino.nome_mittente) {
     document.getElementById('eyebrow').textContent = 'Hai ricevuto un regalo da ' + grattino.nome_mittente + ':';
@@ -189,6 +212,12 @@ function avviaScratch(coloreOverlay, grattinoId) {
     document.getElementById('cta-download').style.opacity = '1';
       supabaseClient.from('grattini').update({ grattato: true }).eq('id', grattinoId).then(({ error }) => { if (error) console.error('Errore salvataggio grattato:', error); else console.log('Salvato correttamente'); });
       inviaNotificaApertura();
+
+      if (grattinoCorrenteEliminaDopoApertura) {
+        setTimeout(() => {
+          eliminaGrattino({ id: grattinoId, valore_contenuto: contenutoCorrente?.valore, tipo_contenuto: contenutoCorrente?.tipo });
+        }, 300000); // 5 minuti di margine per vedere/scaricare il contenuto
+      }
     }
   }
 
