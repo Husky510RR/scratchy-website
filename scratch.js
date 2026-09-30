@@ -214,9 +214,12 @@ function avviaScratch(coloreOverlay, grattinoId) {
       inviaNotificaApertura();
 
       if (grattinoCorrenteEliminaDopoApertura) {
-        setTimeout(() => {
-          eliminaGrattino({ id: grattinoId, valore_contenuto: contenutoCorrente?.valore, tipo_contenuto: contenutoCorrente?.tipo });
-        }, 300000); // 5 minuti di margine per vedere/scaricare il contenuto
+        // imposta la scadenza a 5 minuti da adesso: la pulizia automatica lato server
+        // (che gira ogni 5 minuti) la cancellera' davvero, anche se l'utente chiude subito la pagina
+        const nuovaScadenza = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+        supabaseClient.from('grattini').update({ scade_il: nuovaScadenza }).eq('id', grattinoId).then(({ error }) => {
+          if (error) console.error('Errore impostazione scadenza post-apertura:', error);
+        });
       }
     }
   }
