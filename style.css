@@ -114,3 +114,51 @@ h1 {
   margin-bottom: 20px;
   cursor: pointer;
 }
+
+/* Segnalazione contenuto */
+.link-segnala {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px;
+}
+
+#form-segnala {
+  max-width: 320px;
+  margin: 12px auto 0;
+  padding: 16px;
+  background: #fff;
+  border: 2px solid #1A1A1A;
+  border-radius: 16px;
+}
+
+#form-segnala textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 8px;
+  font-family: inherit;
+  margin: 8px 0;
+  resize: vertical;
+}
+
+.segnala-azioni {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+#segnala-confermato {
+  max-width: 320px;
+  margin: 12px auto 0;
+  padding: 16px;
+  text-align: center;
+  color: #178A7C;
+  font-weight: 700;
+}

@@ -70,6 +70,7 @@ function mostraGrattino(grattino) {
   pushTokenMittente = grattino.push_token || null;
   nomeMittenteCorrente = grattino.nome_mittente || null;
   grattinoCorrenteEliminaDopoApertura = grattino.elimina_dopo_apertura || false;
+  grattinoIdCorrente = grattino.id;
 
   if (grattino.nome_mittente) {
     document.getElementById('eyebrow').textContent = 'Hai ricevuto un regalo da ' + grattino.nome_mittente + ':';
@@ -316,8 +317,46 @@ async function inviaNotificaApertura() {
   }
 }
 
+let grattinoIdCorrente = null;
+
+function configuraSegnalazione() {
+  const btnApri = document.getElementById('btn-segnala');
+  const form = document.getElementById('form-segnala');
+  const btnAnnulla = document.getElementById('btn-annulla-segnala');
+  const btnInvia = document.getElementById('btn-invia-segnala');
+  const confermato = document.getElementById('segnala-confermato');
+  const textarea = document.getElementById('motivo-segnalazione');
+
+  btnApri.addEventListener('click', () => {
+    form.classList.remove('nascosto');
+    btnApri.classList.add('nascosto');
+  });
+
+  btnAnnulla.addEventListener('click', () => {
+    form.classList.add('nascosto');
+    btnApri.classList.remove('nascosto');
+  });
+
+  btnInvia.addEventListener('click', async () => {
+    if (!grattinoIdCorrente) return;
+    btnInvia.disabled = true;
+    try {
+      await supabaseClient.from('segnalazioni').insert({
+        grattino_id: grattinoIdCorrente,
+        motivo: textarea.value.trim() || null,
+      });
+      form.classList.add('nascosto');
+      confermato.classList.remove('nascosto');
+    } catch (errore) {
+      console.error('Errore invio segnalazione:', errore);
+      btnInvia.disabled = false;
+    }
+  });
+}
+
 async function inizializza() {
   await supabaseClient.auth.signInAnonymously();
+  configuraSegnalazione();
   caricaGrattino();
 }
 
