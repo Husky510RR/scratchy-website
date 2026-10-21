@@ -17,39 +17,15 @@ async function caricaGrattino() {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from('grattini')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const { data: righe, error } = await supabaseClient.rpc('get_grattino', { p_id: id });
+  const data = Array.isArray(righe) ? righe[0] : righe;
 
   if (error || !data) {
     mostraErrore();
     return;
   }
 
-  if (data.scade_il && new Date(data.scade_il) < new Date()) {
-    // scaduto: mostra il messaggio e cancella la riga + il file (pulizia opportunistica)
-    mostraErrore();
-    eliminaGrattino(data);
-    return;
-  }
-
   mostraGrattino(data);
-}
-
-async function eliminaGrattino(grattino) {
-  try {
-    if (grattino.valore_contenuto && grattino.tipo_contenuto !== 'emoji') {
-      const nomeFile = grattino.valore_contenuto.split('/').pop();
-      if (nomeFile) {
-        await supabaseClient.storage.from('grattini-immagini').remove([nomeFile]);
-      }
-    }
-    await supabaseClient.from('grattini').delete().eq('id', grattino.id);
-  } catch (errore) {
-    console.error('Errore eliminazione grattino:', errore);
-  }
 }
 
 function mostraErrore() {
@@ -67,7 +43,6 @@ function mostraGrattino(grattino) {
   document.getElementById('stato-grattino').classList.remove('nascosto');
 
   contenutoCorrente = { tipo: grattino.tipo_contenuto, valore: grattino.valore_contenuto };
-  pushTokenMittente = grattino.push_token || null;
   nomeMittenteCorrente = grattino.nome_mittente || null;
   grattinoCorrenteEliminaDopoApertura = grattino.elimina_dopo_apertura || false;
   grattinoIdCorrente = grattino.id;
@@ -211,17 +186,11 @@ function avviaScratch(coloreOverlay, grattinoId) {
       rivelato = true;
       document.getElementById('cta-download').classList.remove('nascosto');
     document.getElementById('cta-download').style.opacity = '1';
-      supabaseClient.from('grattini').update({ grattato: true }).eq('id', grattinoId).then(({ error }) => { if (error) console.error('Errore salvataggio grattato:', error); else console.log('Salvato correttamente'); });
-      inviaNotificaApertura();
-
-      if (grattinoCorrenteEliminaDopoApertura) {
-        // imposta la scadenza a 5 minuti da adesso: la pulizia automatica lato server
-        // (che gira ogni 5 minuti) la cancellera' davvero, anche se l'utente chiude subito la pagina
-        const nuovaScadenza = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-        supabaseClient.from('grattini').update({ scade_il: nuovaScadenza }).eq('id', grattinoId).then(({ error }) => {
-          if (error) console.error('Errore impostazione scadenza post-apertura:', error);
+      supabaseClient.functions
+        .invoke('grattino-aperto', { body: { id: grattinoId } })
+        .then(({ error }) => {
+          if (error) console.error('Errore apertura grattino:', error);
         });
-      }
     }
   }
 
@@ -290,32 +259,6 @@ function apriPerSalvataggio(url) {
 
 document.getElementById('btn-salva-foto').addEventListener('click', scaricaFoto);
 
-async function inviaNotificaApertura() {
-  if (!pushTokenMittente) return;
-
-  const messaggio = nomeMittenteCorrente
-    ? nomeMittenteCorrente + ', il tuo Scratchy è stato grattato! 🎉'
-    : 'Il tuo Scratchy è stato grattato! 🎉';
-
-  try {
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        to: pushTokenMittente,
-        title: 'Scratchy 🎁',
-        body: messaggio,
-        sound: 'default',
-      }),
-    });
-  } catch (errore) {
-    console.error('Errore invio notifica:', errore);
-  }
-}
 
 let grattinoIdCorrente = null;
 
